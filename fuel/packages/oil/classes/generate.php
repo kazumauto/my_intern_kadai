@@ -1773,15 +1773,26 @@ CLASS;
 		$files = new \GlobIterator($base_path .'migrations/*_*.php');
 
 		try
-		{
-			$migrations = array();
-			foreach($files as $file)
-			{
-				$migrations[] = $file->getPathname();
-			}
-			sort($migrations);
-			list($last) = explode('_', basename(end($migrations)));
-		}
+        {
+            $migrations = array();
+            foreach($files as $file)
+            {
+                $migrations[] = $file->getPathname();
+            }
+            sort($migrations);
+
+            // ここから修正：ファイルが無い場合の処理を追加
+            if (empty($migrations))
+            {
+                $last = 0;
+            }
+            else
+            {
+                $parts = explode('_', basename(end($migrations)));
+                $last = (int)$parts[0];
+            }
+            // ここまで修正
+        }
 		catch (\LogicException $e)
 		{
 			throw new Exception("Unable to read existing migrations. Path does not exist, or you may have an 'open_basedir' defined");
