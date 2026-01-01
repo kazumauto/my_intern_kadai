@@ -14,13 +14,14 @@ class Controller_Auth extends Controller
             $password = Input::post('password');
 
             // 2. データベースに保存する準備
-            // (oil generate model で作った Model_User を使います)
             $user = Model_User::forge();
             
             $user->name = $name;
             $user->email = $email;
-            // ※本来はハッシュ化（暗号化）すべきですが、まずはそのまま保存します
-            $user->password = $password; 
+            $user->password = $password;
+            
+            // ★【重要】ここで権限（1=一般）をセットしないとエラーになります！
+            $user->authority = 1;
 
             // 3. 保存実行
             try {
@@ -29,8 +30,8 @@ class Controller_Auth extends Controller
                 Response::redirect('auth/login');
             }
             catch (Exception $e) {
-                // エラーなら何もしない（画面にそのまま留まる）
-                // 実践ではここでエラーメッセージを出します
+                // エラー内容を表示するように改良
+                Session::set_flash('error', '登録失敗: '.$e->getMessage());
             }
         }
 
@@ -51,7 +52,7 @@ class Controller_Auth extends Controller
             $user = Model_User::find('first', array(
                 'where' => array(
                     array('email', $email),
-                    array('password', $password) // ※練習用：本来は暗号化が必要です
+                    array('password', $password)
                 )
             ));
 
@@ -60,15 +61,16 @@ class Controller_Auth extends Controller
             {
                 // 「この人がログイン中ですよ」という証拠（ID）を保存する
                 Session::set('user_id', $user->id);
+                // 権限も保存
+                Session::set('authority', $user->authority);
 
-                // 成功したら、ランキング画面やトップページへ飛ばす
-                // （とりあえず今回は、トップページへ飛ばします）
-                Response::redirect('ranking/home');
+                // ★修正：Viewのファイル名ではなく、URL（コントローラー名）を指定します
+                // ranking/home だと 404エラーになる可能性が高いです
+                Response::redirect('home');
             }
             else
             {
                 // 4. 見つからなかったら（失敗）
-                // エラーメッセージを一時的に保存する
                 Session::set_flash('error', 'メールアドレスかパスワードが間違っています。');
             }
         }

@@ -20,6 +20,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: intern_kadai_db
+    volumes:
+      - ./mysql-data:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
