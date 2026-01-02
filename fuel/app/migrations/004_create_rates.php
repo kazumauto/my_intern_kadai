@@ -10,7 +10,7 @@ class Create_rates
 			'id' => array('constraint' => 11, 'type' => 'int', 'auto_increment' => true, 'unsigned' => true),
 			'ranking_id' => array('constraint' => 11, 'type' => 'int'),
 			'image_id' => array('constraint' => 11, 'type' => 'int'),
-			'score' => array('constraint' => 11, 'type' => 'int'),
+			'score' => array('constraint' => 11, 'type' => 'int', 'default' => 1500),
 			'created_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 			'updated_at' => array('constraint' => 11, 'type' => 'int', 'null' => true),
 

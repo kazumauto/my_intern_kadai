@@ -1,26 +1,45 @@
 <?php
 
-class Model_Ranking extends \Orm\Model
+class Model_Ranking extends Model
 {
-	protected static $_properties = array(
-		'id',
-		'user_id',
-		'name',
-		'created_at',
-		'updated_at',
-	);
+    // ランキングを新規作成するメソッド
+    public static function create_ranking($user_id, $name)
+    {
+        // 1. rankigs テーブルに大会名を保存
+        // DB::insert は、成功すると [id, row_count] の配列を返すので、idだけ受け取ります
+        list($ranking_id, $rows) = DB::insert('rankings')->set(array(
+            'user_id' => $user_id,
+            'name'    => $name,
+        ))->execute();
 
-	protected static $_observers = array(
-		'Orm\Observer_CreatedAt' => array(
-			'events' => array('before_insert'),
-			'mysql_timestamp' => false,
-		),
-		'Orm\Observer_UpdatedAt' => array(
-			'events' => array('before_update'),
-			'mysql_timestamp' => false,
-		),
-	);
+        // 2. 既存のすべての画像をこのランキングに登録（初期スコア1500）
+        // ※Model_Imageのメソッドを再利用します
+        $images = Model_Image::get_all_images(); 
+        
+        foreach ($images as $img) {
+            DB::insert('rates')->set(array(
+                'ranking_id' => $ranking_id,
+                'image_id'   => $img['id'],
+                'score'      => 1500, // 初期レート
+            ))->execute();
+        }
 
-	protected static $_table_name = 'rankings';
+        return $ranking_id;
+    }
 
+    // 全てのランキングを取得
+    public static function get_all()
+    {
+        return DB::select()->from('rankings')->execute()->as_array();
+    }
+
+	// ★追加: IDを指定してランキング情報を1件取得
+    public static function get_by_id($id)
+    {
+        return DB::select()
+            ->from('rankings')
+            ->where('id', $id)
+            ->execute()
+            ->current();
+    }
 }
