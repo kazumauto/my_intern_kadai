@@ -1,28 +1,28 @@
 <?php
 
-class Model_User extends \Orm\Model
+class Model_User extends Model
 {
-	protected static $_properties = array(
-		'id',
-		'name',
-		'email',
-		'password',
-		'authority',
-		'created_at',
-		'updated_at',
-	);
+    // ユーザーを登録するメソッド
+    public static function add_user($name, $email, $password, $authority)
+    {
+        return DB::insert('users')->set(array(
+            'name'       => $name,
+            'email'      => $email,
+            'password'   => $password,
+            'authority'  => $authority,
+            'created_at' => time(),
+            'updated_at' => time(),
+        ))->execute();
+    }
 
-	protected static $_observers = array(
-		'Orm\Observer_CreatedAt' => array(
-			'events' => array('before_insert'),
-			'mysql_timestamp' => false,
-		),
-		'Orm\Observer_UpdatedAt' => array(
-			'events' => array('before_update'),
-			'mysql_timestamp' => false,
-		),
-	);
-
-	protected static $_table_name = 'users';
-
+    // メールとパスワードでユーザーを探すメソッド
+    public static function get_user($email, $password)
+    {
+        $query = DB::select()->from('users')
+            ->where('email', $email)
+            ->where('password', $password)
+            ->execute();
+        
+        return $query->current();
+    }
 }

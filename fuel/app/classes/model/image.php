@@ -1,25 +1,14 @@
 <?php
 
-class Model_Image extends \Orm\Model
+class Model_Image extends Model
 {
-	protected static $_properties = array(
-		'id',
-		'url',
-		'created_at',
-		'updated_at',
-	);
-
-	protected static $_observers = array(
-		'Orm\Observer_CreatedAt' => array(
-			'events' => array('before_insert'),
-			'mysql_timestamp' => false,
-		),
-		'Orm\Observer_UpdatedAt' => array(
-			'events' => array('before_update'),
-			'mysql_timestamp' => false,
-		),
-	);
-
-	protected static $_table_name = 'images';
-
+    // 画像データを保存するメソッド
+    public static function add_image($filename)
+    {
+        return DB::insert('images')->set(array(
+            'url'        => $filename,
+            'created_at' => time(),
+            'updated_at' => time(),
+        ))->execute();
+    }
 }
