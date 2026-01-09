@@ -6,7 +6,6 @@
 <body>
 
     <div style="text-align: right;">
-        <a href="/battle">⚔️ 対決へ</a> | 
         <a href="/auth/login">ログアウト</a>
     </div>
 
@@ -15,13 +14,21 @@
     <div style="max-width: 500px; margin: 0 auto; text-align: left;">
         
         <?php if (!empty($rankings)): ?>
-            <?php foreach ($rankings as $r): ?>
+            <?php foreach ($rankings as $ranking): ?>
                 
                 <div style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd;">
-                    <a href="/home/view/<?php echo $r['id']; ?>">
-                        🏆 <?php echo $r['name']; ?>
+                    <a href="/home/view/<?php echo $ranking['id']; ?>">
+                        🏆 <?php echo $ranking['name']; ?>
                     </a>
                 </div>
+
+                <?php if ($ranking['user_id'] == Session::get('user_id')): ?>
+                    <a href="/home/delete/<?php echo $ranking['id']; ?>" 
+                       class="btn btn-danger btn-sm" 
+                       onclick="return confirm('本当にこのランキングを削除してもよろしいですか？\n※この操作は取り消せません。');">
+                       削除する
+                    </a>
+                <?php endif; ?>
 
             <?php endforeach; ?>
         <?php else: ?>

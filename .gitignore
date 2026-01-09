@@ -1,2 +1,12 @@
 # データベースのデータフォルダを無視する
 docker/mysql-data/
+
+# ログファイルは管理しない
+fuel/app/logs/*
+*/logs/*
+
+# アップロードされた画像は管理しない
+public/assets/img/uploads/*
+
+# ただし、フォルダ自体を消さないための .gitkeep だけは許可する（重要！）
+!public/assets/img/uploads/.gitkeep
