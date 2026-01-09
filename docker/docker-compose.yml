@@ -10,6 +10,8 @@ services:
       - "80:80"
     volumes:
       - ../:/var/www/html/my_fuel_project
+      # ★以下の行を追加（作ったphp.iniを、コンテナ内の設定フォルダにマウント）
+      - ./php.ini:/usr/local/etc/php/php.ini
     networks:
       - fuelphp-network
 
