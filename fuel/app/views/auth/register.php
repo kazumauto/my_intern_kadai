@@ -15,6 +15,12 @@
 
     <h1>新規登録</h1>
 
+    <?php if (Session::get_flash('error')): ?>
+        <div class="alert alert-danger">
+            <?php echo Session::get_flash('error'); ?>
+        </div>
+    <?php endif; ?>
+
     <form action="" method="post">
         
         <div class="form-group">

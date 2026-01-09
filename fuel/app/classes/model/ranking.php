@@ -24,7 +24,7 @@ class Model_Ranking extends Model
             ))->execute();
         }
 
-        return $ranking_id;
+        return $ranking_id;//この行は必要なのか？
     }
 
     // 全てのランキングを取得
@@ -41,5 +41,22 @@ class Model_Ranking extends Model
             ->where('id', $id)
             ->execute()
             ->current();
+    }
+
+    // classes/model/ranking.php に追加
+
+    // ランキングとその関連データを削除する
+    public static function delete_ranking($ranking_id)
+    {
+        // 1. まず、このランキングに関連するスコア(rates)を全削除
+        // (これを忘れると、データベースにゴミが残ります)
+        DB::delete('rates')
+            ->where('ranking_id', $ranking_id)
+            ->execute();
+
+        // 2. 最後に、ランキング本体(rankings)を削除
+        return DB::delete('rankings')
+            ->where('id', $ranking_id)
+            ->execute();
     }
 }

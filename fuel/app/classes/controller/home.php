@@ -63,4 +63,34 @@ class Controller_Home extends Controller
 
         return $view;
     }
+
+    // classes/controller/home.php に追加
+
+    public function action_delete($ranking_id = null)
+    {
+        // 1. ログインチェック
+        if (Session::get('user_id') == null) {
+            Response::redirect('auth/login');
+        }
+
+        // 2. ランキングが存在するか確認
+        $ranking = Model_Ranking::get_by_id($ranking_id);
+        if (!$ranking) {
+            Response::redirect('home');
+        }
+
+        // ★重要: 「自分のランキング」以外は消せないようにする！
+        // (URLを直接入力して、他人のランキングを消されるのを防ぐため)
+        if ($ranking['user_id'] != Session::get('user_id')) {
+            Session::set_flash('error', '削除権限がありません。');
+            Response::redirect('home');
+        }
+
+        // 3. 削除実行
+        Model_Ranking::delete_ranking($ranking_id);
+
+        // 4. メッセージを出してホームに戻る
+        Session::set_flash('success', 'ランキングを削除しました。');
+        Response::redirect('home');
+    }
 }
