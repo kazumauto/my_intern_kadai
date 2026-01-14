@@ -68,6 +68,16 @@ class Controller_Home extends Controller
 
     public function action_delete($ranking_id = null)
     {
+        // ★0. CSRF対策（最優先でチェック！）
+        // フォームから送られた「合言葉」が正しいかチェックします。
+        // もし合言葉がない（直接URLを入力した等）場合も、ここで弾かれます。
+        if ( ! Security::check_token())
+        {
+            // エラーを表示して元のページに戻す、または処理を中断する
+            Session::set_flash('error', 'ページ遷移が正しくありません。もう一度お試しください。');
+            Response::redirect('home');
+        }
+
         // 1. ログインチェック
         if (Session::get('user_id') == null) {
             Response::redirect('auth/login');
@@ -79,17 +89,16 @@ class Controller_Home extends Controller
             Response::redirect('home');
         }
 
-        // ★重要: 「自分のランキング」以外は消せないようにする！
-        // (URLを直接入力して、他人のランキングを消されるのを防ぐため)
+        // 3. 「自分のランキング」以外は消せないようにする！
         if ($ranking['user_id'] != Session::get('user_id')) {
             Session::set_flash('error', '削除権限がありません。');
             Response::redirect('home');
         }
 
-        // 3. 削除実行
+        // 4. 削除実行
         Model_Ranking::delete_ranking($ranking_id);
 
-        // 4. メッセージを出してホームに戻る
+        // 5. メッセージを出してホームに戻る
         Session::set_flash('success', 'ランキングを削除しました。');
         Response::redirect('home');
     }

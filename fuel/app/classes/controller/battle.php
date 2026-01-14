@@ -68,36 +68,4 @@ class Controller_Battle extends Controller
         ));
     }
 
-    public function action_api_vote()
-    {
-        // 1. Ajax以外からのアクセスは拒否する（セキュリティ的なお作法）
-        if ( ! Input::is_ajax())
-        {
-            throw new HttpNotFoundException();
-        }
-
-        // 2. 送られてきたデータを受け取る
-        // (Knockout.jsから winner_id, loser_id, ranking_id が送られてくる想定)
-        $winner_id  = Input::post('winner_id');
-        $loser_id   = Input::post('loser_id');
-        $ranking_id = Input::post('ranking_id');
-
-        // 3. 投票処理（レート更新）を行う
-        // ※今まで使っていたモデルのメソッドをそのまま使います
-        Model_Ranking::update_score($ranking_id, $winner_id, $loser_id);
-
-        // 4. 次の対戦ペアを取得する（ここも既存メソッドを活用！）
-        $next_pair = Model_Ranking::get_random_pair($ranking_id);
-
-        // 5. データをJSON形式にまとめて返す
-        $data = array(
-            'status' => 'success',
-            'match'  => $next_pair, // 次の画像のURLやIDが入っている
-        );
-
-        // ★ここがポイント：Viewではなく、JSONを返す
-        return Response::forge(json_encode($data), 200, array(
-            'Content-Type' => 'application/json',
-        ));
-    }
 }
