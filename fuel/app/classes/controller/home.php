@@ -7,12 +7,20 @@ class Controller_Home extends Controller
     // ----------------------------------------------------
     public function action_index()
     {
-        if (Session::get('user_id') == null) {
+        if (! Auth::check()) {
             Response::redirect('auth/login');
         }
 
+        // ▼ランキング作成処理
         if (Input::method() == 'POST')
         {
+            // ★追加: ここも「作成」処理なので、CSRFチェックが必須です！
+            if ( ! Security::check_token())
+            {
+                Session::set_flash('error', 'ページ遷移が正しくありません。');
+                Response::redirect('home');
+            }
+
             $name = Input::post('name');
             if ($name) {
                 Model_Ranking::create_ranking(Session::get('user_id'), $name);
@@ -20,25 +28,37 @@ class Controller_Home extends Controller
             }
         }
 
-        // 1. データを取得
-        $rankings = Model_Ranking::get_all() ?: array();
+        // (Auth::get_user_id()[1] の方が確実ですが、Sessionで動いているならこれでもOK)
+        $my_user_id = Session::get('user_id');
+
+        // 1. データを取得。?:は、左側がnullだったら、右側を使う、というルール。
+        $rankings = Model_Ranking::get_by_user($my_user_id) ?: array();
+
+        // ★追加: NULL退治（一覧データ用）
+        // 配列の深い階層までNULLがないかチェックして掃除します
+        foreach ($rankings as $key => $row) {
+            foreach ($row as $col_name => $val) {
+                if (is_null($val)) {
+                    $rankings[$key][$col_name] = '';
+                    //$valはコピーなので、本体を直接変えている。
+                }
+            }
+        }
 
         // 2. Viewを作る
         $view = View::forge('home/index');
 
-        // ★ここが修正ポイント！
-        // 第3引数を 'false' にすると、自動フィルター（掃除）が無効になります。
-        // これで get_class() エラーを強制的に回避できます。
-        $view->set('rankings', $rankings, false);
-
+        // ★修正: false を削除！（これで安全にXSS対策が効きます）
+        $view->set('rankings', $rankings);
         return $view;
     }
 
     // ----------------------------------------------------
     // 2. 詳細画面：特定のランキングの順位表を表示
     public function action_view($ranking_id = null)
+    //=nullは、入力がなかった時のデフォルト値。エラー防止用。
     {
-        if (Session::get('user_id') == null) {
+        if (! Auth::check()) {
             Response::redirect('auth/login');
         }
 
@@ -49,22 +69,33 @@ class Controller_Home extends Controller
             Response::redirect('home');
         }
 
+        // ★追加: NULL退治（単体データ用）
+        foreach ($ranking as $key => $value) {
+            if (is_null($value)) {
+                $ranking[$key] = '';
+            }
+        }
+
         // 順位表を取得
         $list = Model_Rate::get_ranking_list($ranking_id);
 
-        // ★修正ポイント
-        // View::forge の書き方を変更し、set(..., false) を使います。
-        
+        // ★追加: NULL退治（リストデータ用）
+        foreach ($list as $key => $row) {
+            foreach ($row as $col_name => $val) {
+                if (is_null($val)) {
+                    $list[$key][$col_name] = '';
+                }
+            }
+        }
+
         $view = View::forge('home/view');
 
-        // 第3引数を false にして、自動フィルタリングを無効化
-        $view->set('ranking', $ranking, false);
-        $view->set('list',    $list,    false);
+        // ★修正: false を削除！（これで安全）
+        $view->set('ranking', $ranking);
+        $view->set('list',    $list);
 
         return $view;
     }
-
-    // classes/controller/home.php に追加
 
     public function action_delete($ranking_id = null)
     {
@@ -79,7 +110,7 @@ class Controller_Home extends Controller
         }
 
         // 1. ログインチェック
-        if (Session::get('user_id') == null) {
+        if (! Auth::check()) {
             Response::redirect('auth/login');
         }
 
@@ -90,7 +121,17 @@ class Controller_Home extends Controller
         }
 
         // 3. 「自分のランキング」以外は消せないようにする！
-        if ($ranking['user_id'] != Session::get('user_id')) {
+    
+        // 【修正前】 手書きメモを見る（危険、または空っぽかも）
+        // if ($ranking['user_id'] != Session::get('user_id')) {
+
+        // 【修正後】 Auth公式のID情報を取得する
+        // Auth::get_user_id() は array('simpleauth', '1') のように
+        // [0]=>ドライバ名, [1]=>ユーザーID という配列で返ってきます。
+        $auth_info = Auth::get_user_id();
+        $current_user_id = $auth_info[1]; // 2番目の要素がIDです
+
+        if ($ranking['user_id'] != $current_user_id) {
             Session::set_flash('error', '削除権限がありません。');
             Response::redirect('home');
         }

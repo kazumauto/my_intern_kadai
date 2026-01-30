@@ -16,11 +16,13 @@
             <h1 class="display-5 fw-bold">🏆 <?php echo $ranking['name']; ?> 🏆</h1>
         </div>
 
-        <div class="text-center mb-5">
-            <a href="/battle/index/<?php echo $ranking['id']; ?>" class="btn btn-danger btn-lg px-5 py-3 shadow">
-                <span class="fs-4">⚔️ このランキングで対決開始！</span>
-            </a>
-        </div>
+        <?php if ($ranking['user_id'] == Session::get('user_id')): ?>
+            <div class="text-center mb-5">
+                <a href="/battle/index/<?php echo $ranking['id']; ?>" class="btn btn-danger btn-lg px-5 py-3 shadow">
+                    <span class="fs-4">⚔️ このランキングで対決開始！</span>
+                </a>
+            </div>
+        <?php endif; ?>
 
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -75,7 +77,7 @@
                                         </td>
 
                                         <td class="text-center">
-                                            <?php echo Asset::img('uploads/' . $row['url'], array('class' => 'img-thumbnail shadow-sm', 'style' => 'max-width: 100px;')); ?>
+                                            <img src="/assets/img/uploads/<?php echo $row['url']; ?>" class="img-thumbnail shadow-sm" style="max-width: 100px;">
                                         </td>
 
                                         <td class="text-center fw-bold fs-5">

@@ -23,6 +23,7 @@
                             </div>
                         <?php endif; ?>
 
+                        <!-- 自分自身にデータを送ってという指示　-->
                         <?php echo Form::open(array('action' => '', 'method' => 'post')); ?>
                             
                             <?php echo Form::csrf(); ?>

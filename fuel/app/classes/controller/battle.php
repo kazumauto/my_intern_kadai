@@ -6,7 +6,7 @@ class Controller_Battle extends Controller
     public function action_index($ranking_id = null)
     {
         // ログインチェック
-        if (Session::get('user_id') == null) {
+        if ( ! Auth::check()) {
             Response::redirect('auth/login');
         }
 
@@ -14,6 +14,25 @@ class Controller_Battle extends Controller
         $ranking = Model_Ranking::get_by_id($ranking_id);
         if (!$ranking) {
             Response::redirect('home');
+        }
+
+        // ▼▼▼ 追加：自分のランキングでなければ追い出す ▼▼▼
+        $auth_info = Auth::get_user_id(); // ログイン情報を取得 ([0]=>ドライバID, [1]=>ユーザーID)
+        $my_id = $auth_info[1];           // 自分のIDを取り出す
+
+        // ランキングの作成者ID と 自分のID が違ったら...
+        if ($ranking['user_id'] != $my_id) {
+            Session::set_flash('error', '自分以外のランキングには投票できません。');
+            Response::redirect('home');
+        }
+        // ▲▲▲ ここまで ▲▲▲
+
+        // ★追加: NULL を 空文字に変換するおまじない
+        // これをやることで、Viewの前に働くSecurityクラスがエラーを吐かなくなります
+        foreach ($ranking as $key => $value) {
+            if (is_null($value)) {
+                $ranking[$key] = '';
+            }
         }
 
         // 対戦する2枚の画像を取得
@@ -27,7 +46,7 @@ class Controller_Battle extends Controller
 
         // Viewの作成（フィルター無効化を忘れずに！）
         $view = View::forge('battle/index');
-        $view->set('ranking', $ranking, false);
+        $view->set('ranking', $ranking);
         $view->set('player1', $players[0], false);
         $view->set('player2', $players[1], false);
 
@@ -63,6 +82,7 @@ class Controller_Battle extends Controller
         );
 
         // 6. JSONとして出力
+        // Response::forgeは、HTML表示以外のことをするときに使う。
         return Response::forge(json_encode($response_data), 200, array(
             'Content-Type' => 'application/json',
         ));
