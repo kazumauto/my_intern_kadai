@@ -26,9 +26,13 @@
             <div class="card-body">
                 <h5 class="card-title mb-3">新規アップロード</h5>
                 
+                <!-- enctypeは、ファイルを送るための特別な梱包をするという意味 -->
                 <?php echo Form::open(array('action' => 'post/save', 'enctype' => 'multipart/form-data', 'class' => 'row g-3 align-items-center')); ?>
                     
+                    <?php echo Form::csrf(); ?>
+
                     <div class="col-auto">
+                        <!-- type="file"のおかげで、ファイル選択画面が開く -->
                         <input type="file" name="upload_file[]" multiple="multiple" class="form-control" required>
                     </div>
                     
@@ -50,7 +54,7 @@
                 <div class="col">
                     <div class="card h-100 shadow-sm">
                         <div class="p-2">
-                            <?php echo Asset::img('uploads/' . $img['url'], array('class' => 'card-img-top', 'style' => '')); ?>
+                            <img src="/assets/img/uploads/<?php echo $img['url']; ?>" class="card-img-top">
                         </div>
                         
                         <div class="card-body text-center pt-0">

@@ -9,7 +9,7 @@
     <div class="container mt-4">
 
         <div class="text-end mb-3">
-            <a href="/auth/login" class="btn btn-outline-secondary btn-sm">ログアウト</a>
+            <a href="/auth/logout" class="btn btn-outline-secondary btn-sm">ログアウト</a>
         </div>
 
         <h1 class="text-center mb-4">開催中のランキング</h1>

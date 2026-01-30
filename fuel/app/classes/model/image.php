@@ -40,16 +40,16 @@ class Model_Image extends Model
             ->execute();
     }
 
-	// ★追加: ファイル名で検索して、存在するかどうか調べる
+	// ★重複チェックメソッド
+    // ハッシュ化されたファイル名がDBにあるか調べる
     public static function check_duplicate($filename)
     {
-        $result = DB::select()
-            ->from('images')
-            ->where('url', $filename) // urlカラムにファイル名が入っています
-            ->execute()
-            ->current();
+        $query = DB::select('id')
+            ->from('images') // ※テーブル名が 'images' の場合
+            ->where('url', '=', $filename)
+            ->execute();
 
-        // データがあれば true (重複)、なければ false を返す
-        return ($result != null);
+        // 1件以上あれば true (重複)
+        return count($query) > 0;
     }
 }

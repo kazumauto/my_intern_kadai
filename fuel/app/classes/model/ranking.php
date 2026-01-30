@@ -16,6 +16,7 @@ class Model_Ranking extends Model
         // ※Model_Imageのメソッドを再利用します
         $images = Model_Image::get_all_images(); 
         
+        //idはオートインクリメントなので、書いてはいけない。
         foreach ($images as $img) {
             DB::insert('rates')->set(array(
                 'ranking_id' => $ranking_id,
@@ -23,14 +24,26 @@ class Model_Ranking extends Model
                 'score'      => 1500, // 初期レート
             ))->execute();
         }
-
-        return $ranking_id;//この行は必要なのか？
+        
+        //createするメソッドは、作成したもののidや実体を返すのが定石。
+        return $ranking_id;
     }
 
     // 全てのランキングを取得
     public static function get_all()
     {
         return DB::select()->from('rankings')->execute()->as_array();
+    }
+
+    // ★追加：特定のユーザーのランキングだけを取得するメソッド
+    public static function get_by_user($user_id)
+    {
+        return DB::select()
+            ->from('rankings')             // テーブル名
+            ->where('user_id', $user_id)   // ★ここで「自分のID」で絞り込む！
+            ->order_by('created_at', 'desc') // 新しい順
+            ->execute()
+            ->as_array();
     }
 
 	// ★追加: IDを指定してランキング情報を1件取得
@@ -42,8 +55,6 @@ class Model_Ranking extends Model
             ->execute()
             ->current();
     }
-
-    // classes/model/ranking.php に追加
 
     // ランキングとその関連データを削除する
     public static function delete_ranking($ranking_id)

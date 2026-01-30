@@ -183,6 +183,8 @@ return array(
 			'Fuel\\Core\\ViewModel',
 			'Closure',
 		),
+
+		'x_frame_options' => 'SAMEORIGIN',
 	),
 
 	/**

@@ -17,11 +17,15 @@
         <div class="row justify-content-center align-items-center g-4">
             
             <div class="col-md-5">
-                
+
+                <!-- function(){}で囲むと、クリックした瞬間に実行される -->
                 <div class="card shadow border-0 h-100" style="cursor: pointer;"
                      data-bind="click: function() { vote(player1(), player2()) }">
                     
                     <div class="ratio ratio-1x1">
+                        <!-- attr:HTMLの「属性（Attribute）」を操作します、という宣言。
+                            src: その中でも「src（画像の場所）」という属性を操作します、という指定。
+                            player1 は ko.observable -->
                         <img class="card-img-top object-fit-cover" data-bind="attr: { src: imageBaseUrl + player1().url }">
                     </div>
 
@@ -75,6 +79,9 @@
             const self = this;
 
             // PHPから渡された初期データを入れる
+            //1.json_encode は、「PHPのデータを、JSでも読める形式（JSON文字列）に変換する関数」
+            //2.echoで、変換後のデータが直接書き込まれる。
+            //3.ko.observableで監視機能を付ける。
             self.player1 = ko.observable(<?php echo json_encode($player1); ?>);
             self.player2 = ko.observable(<?php echo json_encode($player2); ?>);
 
@@ -82,25 +89,34 @@
             self.vote = function(winner, loser) {
                 console.log("投票: " + winner.url + " の勝ち");
 
+                //ajax通信をする
                 $.ajax({
+                    //宛先
                     url: voteApiUrl,
+                    //通信方法
                     type: 'POST',
+                    //返信の形式
                     dataType: 'json',
+                    //荷物
                     data: {
                         ranking_id: <?php echo $ranking['id']; ?>,
                         winner_id:  winner.image_id,
                         loser_id:   loser.image_id
                     }
                 })
+                //ajaxが成功したら
+                // responseにはサーバーからの返信が入っている。
                 .done(function(response) {
                     // 成功したら、新しいペアに入れ替える
                     console.log("次のペア受信:", response);
                     
+                    //responseのnext_pair。ドット記法
                     const next = response.next_pair;
                     
                     self.player1(next[0]);
                     self.player2(next[1]);
                 })
+                //ajaxが失敗したら
                 .fail(function(e) {
                     console.error("通信エラー", e);
                     alert("投票に失敗しました");
@@ -108,6 +124,7 @@
             };
         }
 
+        //起動コマンド
         ko.applyBindings(new BattleViewModel());
     </script>
     
