@@ -31,7 +31,9 @@ class Controller_Battle extends Controller
     // ランキングの作成者ID と 自分のID が違ったら...
     if ($ranking['user_id'] != $my_id) {
       Session::set_flash('error', '自分以外のランキングには投票できません。');
-      Response::redirect('home');
+
+      // ▼▼▼ 修正：home ではなく、詳細画面（home/view/ID）に戻す ▼▼▼
+      Response::redirect('home/view/' . $ranking_id);
     }
     // ▲▲▲ ここまで ▲▲▲
 

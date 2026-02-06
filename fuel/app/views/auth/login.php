@@ -20,8 +20,14 @@
 
             <h1 class="h3 text-center mb-4">ログイン</h1>
 
+            <?php if (Session::get_flash('success')): ?>
+              <div class="alert alert-success">
+                <?php echo Session::get_flash('success'); ?>
+              </div>
+            <?php endif; ?>
+
             <?php if (Session::get_flash('error')): ?>
-              <div class="alert alert-danger text-center font-sm">
+              <div class="alert alert-danger">
                 <?php echo Session::get_flash('error'); ?>
               </div>
             <?php endif; ?>
