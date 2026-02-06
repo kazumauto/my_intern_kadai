@@ -16,6 +16,9 @@ class Controller_Auth extends Controller
         // ▼▼▼ 追加：ここで前のユーザーをログアウトさせる！ ▼▼▼
         Auth::logout();
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+        Session::set_flash('success', '登録に成功しました。ログインしてください。');
+
         Response::redirect('auth/login');
       }
       //$eは、エラーが発生した瞬間にPHPが自動で作ってくれるエラー情報オブジェクト
