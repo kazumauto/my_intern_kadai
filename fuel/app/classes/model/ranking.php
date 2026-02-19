@@ -12,6 +12,14 @@ class Model_Ranking extends Model
       'name'    => $name,
     ))->execute();
 
+    // ▼▼▼ 追加：Configファイルから初期レートを読み込む ▼▼▼
+    // 第一引数：ファイル名、第二引数：true（グループ化して名前の衝突を防ぐ）
+    Config::load('battle', true);
+
+    // 値を取得（もし設定ファイルが無かった時のために、第2引数で保険の 1500 を入れておくとプロっぽいです）
+    $default_rate = Config::get('battle.default_rate', 1500);
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
     // 2. 既存のすべての画像をこのランキングに登録（初期スコア1500）
     // ※Model_Imageのメソッドを再利用します
     $images = Model_Image::get_all_images();
@@ -21,7 +29,8 @@ class Model_Ranking extends Model
       DB::insert('rates')->set(array(
         'ranking_id' => $ranking_id,
         'image_id'   => $img['id'],
-        'score'      => 1500, // 初期レート
+        // ▼ 修正：直接 1500 と書かず、変数を使う
+        'score'      => $default_rate,
       ))->execute();
     }
 
